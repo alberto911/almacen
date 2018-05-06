@@ -1,10 +1,6 @@
 var db = require('seraph')({ pass: 'Ariel' });
 var MateriaPrima = require('../models/materiaprima');
-var collections = require('../client/src/collections.js');
-
-const collectionsIncludeValues = (unidad, categoria) => (
-  collections.unidades.includes(unidad) && collections.categorias.map(x => x.label).includes(categoria)
-);
+var helper = require('./helper');
 
 exports.materiaprima_list = (req, res, next) => {
   db.nodesWithLabel('MateriaPrima', (err, nodes) => {
@@ -12,6 +8,25 @@ exports.materiaprima_list = (req, res, next) => {
     res.json(nodes);
   });
 };
+
+exports.proximos_a_caducar = (req, res, next) => {
+  const query = "match (i:MateriaPrimaInstance)<-[HAY]-(m:MateriaPrima) "
+              + "where i.fechaCaducidad < {fecha} "
+              + "return id(i) as id, m.nombre as nombre, i.cantidad as cantidad, m.unidad as unidad, i.fechaCaducidad as fechaCaducidad "
+              + "order by fechaCaducidad";
+  db.query(query, { fecha: helper.todayPlusDays(3) }, (err, productos) => {
+    if (err) return next(err);
+    res.json(productos);
+  });
+};
+
+exports.costo = (req, res, next) => {
+  const query = "match (n:MateriaPrima)-[:HAY]->(i:MateriaPrimaInstance) return sum((i.cantidad * n.costo) / n.cantidad) as costo";
+  db.query(query, (err, total) => {
+    if (err) return next(err);
+    res.json(total[0]);
+  });
+}
 
 exports.materiaprima_category_list = (req, res, next) => {
   db.nodesWithLabel(req.params.cat, (err, nodes) => {
@@ -22,7 +37,7 @@ exports.materiaprima_category_list = (req, res, next) => {
 
 exports.materiaprima_create = (req, res, next) => {
   const categoria = req.body.categoria;
-  if (!collectionsIncludeValues(req.body.unidad, categoria))
+  if (!helper.collectionsIncludeValues(req.body.unidad, categoria))
     return next();
   delete req.body.categoria;
   req.body.costo = parseFloat(req.body.costo);
@@ -41,7 +56,15 @@ exports.materiaprima_read = (req, res, next) => {
   MateriaPrima.read(req.params.id, (err, node) => {
     if (err || !node) return next(err);
     db.readLabels(node, (err, labels) => {
+      if (err || !labels.includes('MateriaPrima')) return next(err);
       node.categoria = labels.slice(-1)[0];
+
+      // Calcular costo por instancia
+      if (node.instancias) {
+        for (let i = 0; i < node.instancias.length; ++i)
+          node.instancias[i].costo = (node.instancias[i].cantidad * node.costo) / node.cantidad;
+      }
+
       res.json(node);
     });
   });
@@ -51,7 +74,7 @@ exports.materiaprima_update = (req, res, next) => {
   // Actualizar la categoria
   const categoria = req.body.categoria;
   const categoria_anterior = req.body.categoria_anterior;
-  if (!collectionsIncludeValues(req.body.unidad, categoria))
+  if (!helper.collectionsIncludeValues(req.body.unidad, categoria))
     return next();
   delete req.body.categoria;
   delete req.body.categoria_anterior;
@@ -102,7 +125,7 @@ exports.create_instance = (req, res, next) => {
   const fecha = req.body.fechaCaducidad;
   const instance = {
     cantidad: parseFloat(req.body.cantidad),
-    fechaCaducidad: fecha.substr(0,4) + '/' + fecha.substr(5,2) + '/' + fecha.substr(8,2)
+    fechaCaducidad: new Date(fecha.substr(0,4) + '/' + fecha.substr(5,2) + '/' + fecha.substr(8,2)).getTime()
   };
   MateriaPrima.push(req.params.id, 'instancias', instance, (err, inst) => {
     if (err) return next(error);

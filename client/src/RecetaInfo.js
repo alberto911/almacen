@@ -1,13 +1,14 @@
 import React from 'react';
 import Ingredients from './Ingredients';
+import { round } from './helper.js';
 
-const RecetaInfo = ({ receta }) => (
+const RecetaInfo = ({ product }) => (
   <div>
-    <p>Rinde {receta.cantidad} {receta.unidad}</p>
-    <p>Caduca {receta.diasCaducidad} días después de preparar</p>
-    <p>Costo: (pendiente)</p>
+    <p>Rinde {product.cantidad} {product.unidad}</p>
+    <p>Caduca {product.diasCaducidad} días después de preparar</p>
+    <p>Costo: ${round(product.costo, 2)}</p>
 
-    <Ingredients ingredients={receta.ingredientes} />
+    <Ingredients ingredients={product.ingredientes} />
   </div>
 );
 

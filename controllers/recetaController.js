@@ -1,10 +1,7 @@
 var db = require('seraph')({ pass: 'Ariel' });
 var Receta = require('../models/receta');
-var collections = require('../client/src/collections.js');
-
-const collectionsIncludeValues = (unidad) => (
-  collections.unidades.includes(unidad)
-);
+var MateriaPrima = require('../models/materiaprima');
+var helper = require('./helper');
 
 exports.receta_list = (req, res, next) => {
   db.nodesWithLabel('Receta', (err, nodes) => {
@@ -13,11 +10,38 @@ exports.receta_list = (req, res, next) => {
   });
 };
 
+exports.proximos_a_caducar = (req, res, next) => {
+  const query = "match (p:ProductoElaborado)<-[HAY]-(r:Receta) "
+              + "where p.fechaCaducidad < {fecha} "
+              + "return id(p) as id, r.nombre as nombre, p.cantidad as cantidad, r.unidad as unidad, p.fechaCaducidad as fechaCaducidad "
+              + "order by fechaCaducidad";
+  db.query(query, { fecha: helper.todayPlusDays(3) }, (err, productos) => {
+    if (err) return next(err);
+    res.json(productos);
+  });
+};
+
+exports.costo = (req, res, next) => {
+  var promises = [];
+  const query = "match (n:Receta) return id(n) as id";
+  db.query(query, (err, ids) => {
+    if (err) return next(err);
+    for (id of ids)
+      promises.push(getRecipe(id));
+    Promise.all(promises)
+      .then(r => r.filter(p => p.instancias))
+      .then(r => r.map(p => p.instancias.map(i => i.costo).reduce((total,i) => total + i)))
+      .then(r => r.reduce((total,i) => total + i))
+      .then(total => res.json({costo: total}))
+      .catch(error => next(error));
+  });
+};
+
 exports.receta_create = (req, res, next) => {
   const ingredientes = req.body.ingredientes;
   delete req.body.ingredientes;
 
-  if (!collectionsIncludeValues(req.body.unidad))
+  if (!helper.collectionsIncludeValues(req.body.unidad))
     return next();
   req.body.diasCaducidad = parseInt(req.body.diasCaducidad);
   req.body.cantidad = parseFloat(req.body.cantidad);
@@ -35,66 +59,45 @@ exports.receta_create = (req, res, next) => {
 };
 
 exports.receta_read = (req, res, next) => {
-  Receta.read(req.params.id, (err, node) => {
-    if (err || !node) return next(err);
-    db.relationships(node, 'out', 'CONTIENE', (err, rels) => {
-      if (err) return next(err);
-      var txn = db.batch();
-      for (let i = 0; i < rels.length; ++i) {
-        txn.read(rels[i].end, (err, product) => {
-          rels[i].materiaprima = product;
-        });
-      }
-      txn.commit((err, results) => {
-        if (err) return next(err);
-        rels = rels.map(r => ({ id: String(r.materiaprima.id), cantidad: r.properties.cantidad, nombre: r.materiaprima.nombre, unidad: r.materiaprima.unidad }));
-        node.ingredientes = rels;
-        res.json(node);
-      });
-    });
-  });
+  getRecipe(req.params.id)
+    .then(node => res.json(node))
+    .catch(error => next(error));
 }
 
 exports.receta_update = (req, res, next) => {
-  /*if (!collectionsIncludeValues(req.body.unidad))
+  if (!helper.collectionsIncludeValues(req.body.unidad))
     return next();
   const ingredientes = req.body.ingredientes;
   delete req.body.ingredientes;
 
-  db.relationships(req.params.id, 'out', 'CONTIENE', (err, rels) => {
-    if (err) return next(err);
-    var txn = db.batch();
-    for (rel of rels) {
-      if (!ingredientes.find(i => i.id == rel.end && i.cantidad == rel.properties.cantidad))
-        txn.rel.delete(rel);
-    }
-    for (i of ingredientes) {
-      if (!rels.find(rel => i.id == rel.end && i.cantidad == rel.properties.cantidad))
-        txn.relate();
-    }
-  })
-
-  req.body.costo = parseFloat(req.body.costo);
   req.body.cantidad = parseFloat(req.body.cantidad);
+  req.body.diasCaducidad = parseInt(req.body.diasCaducidad);
   req.body.id = parseInt(req.params.id);
-  MateriaPrima.update(req.body, true, (err, node) => {
+  Receta.update(req.body, true, (err, node) => {
     if (err) return next(err);
-    if (categoria != categoria_anterior) {
-      db.label(req.params.id, categoria, (err) => {
+    db.relationships(req.params.id, 'out', 'CONTIENE', (err, rels) => {
+      if (err) return next(err);
+      var txn = db.batch();
+      for (rel of rels) {
+        if (!ingredientes.find(i => i.id == rel.end && i.cantidad == rel.properties.cantidad)) {
+          txn.rel.delete(rel);
+        }
+      }
+      for (i of ingredientes) {
+        if (!rels.find(rel => i.id == rel.end && i.cantidad == rel.properties.cantidad)) {
+          txn.relate(node, 'CONTIENE', i.id, { cantidad: parseFloat(i.cantidad) });
+        }
+      }
+      txn.commit((err, results) => {
         if (err) return next(err);
-        db.removeLabel(req.params.id, categoria_anterior, (err) => {
-          if (err) return next(err);
-          res.json(node);
-        });
+        res.json(node);
       });
-    }
-    else
-      res.json(node);
-  });*/
+    });
+  });
 };
 
-/*exports.receta_delete = (req, res, next) => {
-  MateriaPrima.read(req.params.id, (err, node) => {
+exports.receta_delete = (req, res, next) => {
+  Receta.read(req.params.id, (err, node) => {
     if (err || !node) return next(err);
     var txn = db.batch();
 
@@ -107,8 +110,7 @@ exports.receta_update = (req, res, next) => {
 
     txn.commit((err, results) => {
       if (err) return next(error);
-      // Borrar el nodo si no tiene recetas
-      db.delete(req.params.id, (err) => {
+      db.delete(req.params.id, true, (err) => {
         if (err) return next(err);
         res.json(req.params.id);
       });
@@ -117,15 +119,57 @@ exports.receta_update = (req, res, next) => {
 };
 
 exports.create_instance = (req, res, next) => {
-  const fecha = req.body.fechaCaducidad;
-  const instance = {
-    cantidad: parseFloat(req.body.cantidad),
-    fechaCaducidad: fecha.substr(0,4) + '/' + fecha.substr(5,2) + '/' + fecha.substr(8,2)
-  };
-  MateriaPrima.push(req.params.id, 'instancias', instance, (err, inst) => {
-    if (err) console.log(error);
-    res.json(inst);
-  });
+  getRecipe(req.params.id)
+    .then((receta) => {
+      const ingredient_ids = receta.ingredientes.map(i => parseInt(i.id));
+      req.body.cantidad = parseFloat(req.body.cantidad);
+
+      // Obtener las cantidades disponibles de cada ingrediente
+      const query = "match (n:MateriaPrima)-[:HAY]->(i:MateriaPrimaInstance) "
+                  + "where id(n) in {ids} return id(n) as id, sum(toFloat(i.cantidad)) as cantidad";
+      db.query(query, { ids: ingredient_ids }, (err, cantidadesDisponibles) => {
+        if (err) return next(err);
+        var factor = req.body.cantidad / receta.cantidad;
+        var cantidadesNecesarias = receta.ingredientes.map(i => ({ id: i.id, cantidad: i.cantidad * factor }));
+        for (cantidadNecesaria of cantidadesNecesarias) {
+          var cantidadDisponible = cantidadesDisponibles.find(cd => cd.id == cantidadNecesaria.id);
+          if (!cantidadDisponible || cantidadDisponible.cantidad < cantidadNecesaria.cantidad) {
+            return next("No hay suficientes ingredientes");
+          }
+        }
+
+        // Actualizar cantidades de ingredientes
+        for (let i = 0; i < cantidadesNecesarias.length; ++i) {
+          MateriaPrima.read(cantidadesNecesarias[i].id, (err, producto) => {
+            if (err) return next(error);
+            var j = 0;
+            while (cantidadesNecesarias[i].cantidad > 0) {
+              var cantidadUtilizada = cantidadesNecesarias[i].cantidad >= producto.instancias[j].cantidad ? producto.instancias[j].cantidad : cantidadesNecesarias[i].cantidad;
+              cantidadesNecesarias[i].cantidad -= cantidadUtilizada;
+              producto.instancias[j].cantidad -= cantidadUtilizada;
+              if (producto.instancias[j].cantidad == 0) {
+                const nodeToDelete = producto.instancias.splice(j, 1);
+                db.delete(nodeToDelete, true, (err) => { if (err) return next(err) });
+              }
+              else
+                ++j;
+            }
+            MateriaPrima.save(producto, false, (err, p) => { if (err) return next(err) });
+          });
+        }
+
+        // Crear instancia
+        const instance = {
+          cantidad: req.body.cantidad,
+          fechaCaducidad: helper.todayPlusDays(receta.diasCaducidad)
+        }
+        Receta.push(receta, 'instancias', instance, (err, inst) => {
+          if (err) console.log(error);
+          res.json(inst);
+        });
+      });
+    })
+    .catch(error => next(error));
 };
 
 exports.delete_instance = (req, res, next) => {
@@ -133,4 +177,38 @@ exports.delete_instance = (req, res, next) => {
     if (err) return next(err);
     res.json(req.params.iid);
   });
-};*/
+};
+
+const getRecipe = (id) => {
+  return new Promise((resolve, reject) => {
+    Receta.read(id, (err, node) => {
+      if (err || !node) return reject(err);
+      db.readLabels(node, (err, labels) => {
+        if (err || !labels.includes('Receta')) return reject(err);
+        db.relationships(node, 'out', 'CONTIENE', (err, rels) => {
+          if (err) return reject(err);
+          var txn = db.batch();
+          for (let i = 0; i < rels.length; ++i) {
+            txn.read(rels[i].end, (err, product) => {
+              rels[i].materiaprima = product;
+            });
+          }
+          txn.commit((err, results) => {
+            if (err) return reject(err);
+            const costos = rels.map(r => (r.properties.cantidad * r.materiaprima.costo) / r.materiaprima.cantidad);
+            node.costo = costos.reduce((total, x) => total + x);
+
+            if (node.instancias) {
+              for (let i = 0; i < node.instancias.length; ++i)
+                node.instancias[i].costo = (node.instancias[i].cantidad * node.costo) / node.cantidad
+            }
+
+            rels = rels.map(r => ({ id: String(r.materiaprima.id), cantidad: r.properties.cantidad, nombre: r.materiaprima.nombre, unidad: r.materiaprima.unidad }));
+            node.ingredientes = rels;
+            resolve(node);
+          });
+        });
+      });
+    });
+  });
+};

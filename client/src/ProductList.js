@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { Link, Route, withRouter } from 'react-router-dom';
+import { Link, Route, withRouter, Switch } from 'react-router-dom';
 import ProductDetails from './ProductDetails';
 import MateriaPrimaForm from './MateriaPrimaForm';
 import RecetaForm from './RecetaForm';
 import CategorySelect from './CategorySelect';
+import Summary from './Summary';
 import { compare } from './helper';
 import './ProductList.css';
 
@@ -53,7 +54,6 @@ class ProductList extends Component {
   }
 
   createProduct(json, id='', method='POST') {
-    console.log(json);
     fetch(`/api/${this.props.type}/${id}`, {
       method: method,
       headers: {
@@ -95,14 +95,19 @@ class ProductList extends Component {
           )}
         </div>
         <div className="main">
-          <Route exact={true} path={`/${this.props.type}`} render={() => (
-            this.props.type === 'materiasprimas' ?
-              <MateriaPrimaForm createProduct={this.createProduct} /> :
-              <RecetaForm createProduct={this.createProduct} />
-          )} />
-          <Route path={`/${this.props.type}/:productId`} render={({ match }) => (
-            <ProductDetails id={match.params.productId} deleteProduct={this.deleteProduct} createProduct={this.createProduct} type={this.props.type} />
-          )} />
+          <Switch>
+            <Route exact={true} path={`/${this.props.type}`} render={() => (
+              <Summary type={this.props.type} />
+            )} />
+            <Route exact={true} path={`/${this.props.type}/new`} render={() => (
+              this.props.type === 'materiasprimas' ?
+                <MateriaPrimaForm createProduct={this.createProduct} /> :
+                <RecetaForm createProduct={this.createProduct} />
+            )} />
+            <Route path={`/${this.props.type}/:productId`} render={({ match }) => (
+              <ProductDetails id={match.params.productId} deleteProduct={this.deleteProduct} createProduct={this.createProduct} type={this.props.type} />
+            )} />
+          </Switch>
         </div>
       </div>
     );
@@ -110,7 +115,7 @@ class ProductList extends Component {
 }
 
 const AddProductButon = withRouter((props) => {
-  var onClick = () => props.history.push('/' + props.type);
+  var onClick = () => props.history.push(`/${props.type}/new`);
   return <button onClick={onClick}>Agregar</button>;
 });
 

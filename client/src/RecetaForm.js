@@ -35,6 +35,8 @@ class RecetaForm extends Component {
   }
 
   addIngredient(ingredient) {
+    if (this.state.ingredients.find(i => i.id === ingredient.id))
+      return;
     if (!isNumeric(ingredient.cantidad) || ingredient.cantidad <= 0)
       return;
     delete ingredient.categoria;

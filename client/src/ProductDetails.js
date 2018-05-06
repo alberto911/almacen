@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withRouter } from "react-router-dom";
-import { formToJSON, formatDate } from './helper.js';
+import { formToJSON, formatDate, round } from './helper.js';
 import MateriaPrimaForm from './MateriaPrimaForm';
 import RecetaForm from './RecetaForm';
 import MateriaPrimaInfo from './MateriaPrimaInfo';
@@ -18,6 +18,20 @@ class ProductDetails extends Component {
       edit: false,
       currId: this.props.id
     };
+    this.texts = {
+      materiasprimas: {
+        info: MateriaPrimaInfo,
+        form: MateriaPrimaForm,
+        instance_text: 'Instancias',
+        no_instance_text: 'Este producto no tiene instancias',
+      },
+      recetas: {
+        info: RecetaInfo,
+        form: RecetaForm,
+        instance_text: 'Productos elaborados',
+        no_instance_text: 'No hay productos elaborados',
+      }
+    }
   }
 
   loadProduct() {
@@ -78,6 +92,9 @@ class ProductDetails extends Component {
   render() {
     if (!this.state.product)
       return null;
+    const Info = this.texts[this.props.type].info;
+    const Form = this.texts[this.props.type].form;
+
     return (
       <div>
         {!this.state.edit ?
@@ -85,21 +102,18 @@ class ProductDetails extends Component {
             <h2>{this.state.product.nombre}</h2>
             <DeleteButton deleteProduct={this.props.deleteProduct} id={this.props.id} />
             <button onClick={() => this.setState({ edit: true })}>Editar</button>
-            {this.props.type === 'materiasprimas' ?
-              <MateriaPrimaInfo product={this.state.product} /> :
-              <RecetaInfo receta={this.state.product} />
-            }
-            {this.state.product.instancias ?
-              <Instances instances={this.state.product.instancias} unidad={this.state.product.unidad} deleteInstance={this.deleteInstance} />
-              : <h4>Este producto no tiene instancias</h4>
-            }
+            <Info product={this.state.product} />
 
-            <h4>Agregar instancia</h4>
-            <InstanceForm createInstance={this.createInstance} unidad={this.state.product.unidad}/>
+            <Instances
+              instance_text={this.texts[this.props.type].instance_text}
+              no_instance_text={this.texts[this.props.type].no_instance_text}
+              instances={this.state.product.instancias}
+              unidad={this.state.product.unidad}
+              deleteInstance={this.deleteInstance}
+            />
+            <InstanceForm type={this.props.type} createInstance={this.createInstance} unidad={this.state.product.unidad}/>
           </div>
-          : this.props.type === 'materiasprimas' ?
-              <MateriaPrimaForm product={this.state.product} edit={true} createProduct={this.sendForm} /> :
-              <RecetaForm product={this.state.product} edit={true} createProduct={this.sendForm} />
+          : <Form product={this.state.product} edit={true} createProduct={this.sendForm} />
         }
       </div>
     );
@@ -112,28 +126,36 @@ const DeleteButton = withRouter((props) => (
 
 const InstanceForm = (props) => (
   <div>
+    <h4>{props.type === 'materiasprimas' ? 'Agregar instancia' : 'Preparar receta'}</h4>
     <form onSubmit={props.createInstance}>
       <label htmlFor="cantidad">Cantidad: </label>
       <input type="text" required id="cantidad" name="cantidad" size="4"></input> {props.unidad}<br />
-      <label htmlFor="fechaCaducidad">Fecha de caducidad: </label>
-      <input type="date" required id="fechaCaducidad" name="fechaCaducidad"></input>
-      <button>Insertar</button>
+      {props.type === 'materiasprimas' &&
+        <div>
+          <label htmlFor="fechaCaducidad">Fecha de caducidad: </label>
+          <input type="date" required id="fechaCaducidad" name="fechaCaducidad"></input>
+        </div>
+      }
+      <button>Crear</button>
     </form>
   </div>
 );
 
 const Instances = (props) => (
-  <div>
-    <h4>Instancias</h4>
-    <ul>
-      {props.instances.map(instance =>
-        <li key={instance.id}>
-          {instance.cantidad} {props.unidad}, caduca {formatDate(instance.fechaCaducidad)}
-          &emsp; <button onClick={() => props.deleteInstance(instance.id)}>Borrar</button>
-        </li>
-      )}
-    </ul>
-  </div>
+  props.instances ? (
+    <div>
+      <h4>{props.instance_text}</h4>
+      <ul>
+        {props.instances.map(instance =>
+          <li key={instance.id}>
+            {round(instance.cantidad, 3)} {props.unidad}, caduca {formatDate(instance.fechaCaducidad)} (${round(instance.costo, 2)})
+            &emsp; <button onClick={() => props.deleteInstance(instance.id)}>Borrar</button>
+          </li>
+        )}
+      </ul>
+      <p>Costo total del producto: ${round(props.instances.map(i => i.costo).reduce((total, i) => total + i), 2)}</p>
+    </div>
+  ) : <h4>{props.no_instance_text}</h4>
 );
 
 export default ProductDetails;
