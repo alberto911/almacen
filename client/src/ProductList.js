@@ -87,7 +87,12 @@ class ProductList extends Component {
     return (
       <div>
         <div className="sidenav">
-          <h1>{this.props.name}</h1>
+          <Link to={`/${this.props.type}`} className="title">
+            <h1>{this.props.name}</h1>
+          </Link>
+          <Link to={'/'}>
+            <p>{'<< Inicio'}</p>
+          </Link>
           <AddProductButon type={this.props.type} />
           {this.props.type === 'materiasprimas' && <CategorySelect filter={true} onChange={this.changeFilter}/>}
           {this.state.products.map(product =>

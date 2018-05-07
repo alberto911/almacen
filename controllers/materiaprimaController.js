@@ -28,6 +28,14 @@ exports.costo = (req, res, next) => {
   });
 }
 
+exports.costo_caducados = (req, res, next) => {
+  const query = "match (n:Caducado {nombre: 'materiaprima'}) return n.total as costo";
+  db.query(query, (err, total) => {
+    if (err) return next(err);
+    res.json(total[0]);
+  });
+};
+
 exports.materiaprima_category_list = (req, res, next) => {
   db.nodesWithLabel(req.params.cat, (err, nodes) => {
     if (err) return next(err);

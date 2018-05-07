@@ -27,13 +27,21 @@ exports.costo = (req, res, next) => {
   db.query(query, (err, ids) => {
     if (err) return next(err);
     for (id of ids)
-      promises.push(getRecipe(id));
+      promises.push(exports.getRecipe(id));
     Promise.all(promises)
       .then(r => r.filter(p => p.instancias))
       .then(r => r.map(p => p.instancias.map(i => i.costo).reduce((total,i) => total + i)))
       .then(r => r.reduce((total,i) => total + i))
       .then(total => res.json({costo: total}))
       .catch(error => next(error));
+  });
+};
+
+exports.costo_caducados = (req, res, next) => {
+  const query = "match (n:Caducado {nombre: 'receta'}) return n.total as costo";
+  db.query(query, (err, total) => {
+    if (err) return next(err);
+    res.json(total[0]);
   });
 };
 
@@ -59,7 +67,7 @@ exports.receta_create = (req, res, next) => {
 };
 
 exports.receta_read = (req, res, next) => {
-  getRecipe(req.params.id)
+  exports.getRecipe(req.params.id)
     .then(node => res.json(node))
     .catch(error => next(error));
 }
@@ -119,7 +127,7 @@ exports.receta_delete = (req, res, next) => {
 };
 
 exports.create_instance = (req, res, next) => {
-  getRecipe(req.params.id)
+  exports.getRecipe(req.params.id)
     .then((receta) => {
       const ingredient_ids = receta.ingredientes.map(i => parseInt(i.id));
       req.body.cantidad = parseFloat(req.body.cantidad);
@@ -179,7 +187,7 @@ exports.delete_instance = (req, res, next) => {
   });
 };
 
-const getRecipe = (id) => {
+exports.getRecipe = (id) => {
   return new Promise((resolve, reject) => {
     Receta.read(id, (err, node) => {
       if (err || !node) return reject(err);

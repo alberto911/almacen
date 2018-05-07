@@ -1,4 +1,4 @@
-exports.unidades = ['kg', 'ml', 'pieza(s)', 'porciones'];
+exports.unidades = ['g', 'kg', 'l', 'ml', 'pieza(s)', 'porciones'];
 exports.categorias = [
   { label: 'ProductoFresco', nombre: 'Productos frescos' },
   { label: 'Carne', nombre: 'Carne' },
