@@ -42,12 +42,12 @@ class Main extends Component {
             <Home username={this.state.username} updateCredentials={this.updateCredentials} /> :
             <LoginForm authenticate={this.updateCredentials} />
         )} />
-        <Route path={'/materiasprimas'} render={() => (
+        <Route path="/materiasprimas" render={() => (
           this.state.isAuthenticated ?
             <ProductList type="materiasprimas" name="Materias primas" /> :
             <Redirect to='/' />
         )} />
-        <Route path={'/recetas'} render={() => (
+        <Route path="/recetas" render={() => (
           this.state.isAuthenticated ?
             <ProductList type="recetas" name="Recetas" /> :
             <Redirect to='/' />
