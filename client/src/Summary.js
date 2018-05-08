@@ -13,9 +13,9 @@ class Summary extends Component {
 
   componentDidMount() {
     var url = `/api/${this.props.type}/`;
-    var caducar = fetch(url + 'caducar').then(res => res.json());
-    var costo = fetch(url + 'costo').then(res => res.json());
-    var perdidas = fetch(url + 'costo-caducados').then(res => res.json());
+    var caducar = fetch(url + 'caducar', { credentials: 'include' }).then(res => res.json());
+    var costo = fetch(url + 'costo', { credentials: 'include' }).then(res => res.json());
+    var perdidas = fetch(url + 'costo-caducados', { credentials: 'include' }).then(res => res.json());
     var promises = [caducar, costo, perdidas];
     Promise.all(promises)
       .then(([products, cost, perdidas]) =>

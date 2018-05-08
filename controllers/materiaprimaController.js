@@ -1,4 +1,4 @@
-var db = require('seraph')({ pass: 'Ariel' });
+var db = require('../config/db');
 var MateriaPrima = require('../models/materiaprima');
 var helper = require('./helper');
 
@@ -135,6 +135,8 @@ exports.create_instance = (req, res, next) => {
     cantidad: parseFloat(req.body.cantidad),
     fechaCaducidad: new Date(fecha.substr(0,4) + '/' + fecha.substr(5,2) + '/' + fecha.substr(8,2)).getTime()
   };
+  if (instance.fechaCaducidad < new Date().setHours(0, 0, 0, 0))
+    return next(); // No se pueden agregar productos que ya han caducado
   MateriaPrima.push(req.params.id, 'instancias', instance, (err, inst) => {
     if (err) return next(error);
     res.json(inst);

@@ -33,7 +33,7 @@ class ProductList extends Component {
     var url = `/api/${this.props.type}`;
     if (this.state.category)
       url += `/categoria/${this.state.category}`;
-    fetch(url)
+    fetch(url, {credentials: 'include'})
       .then(res => res.json())
       .then(products => products.sort(compare))
       .then(products => this.setState({ products: products }))
@@ -56,9 +56,10 @@ class ProductList extends Component {
   createProduct(json, id='', method='POST') {
     fetch(`/api/${this.props.type}/${id}`, {
       method: method,
+      credentials: 'include',
       headers: {
         Accept: 'application/json',
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: json
     })
@@ -68,7 +69,7 @@ class ProductList extends Component {
 
   deleteProduct(id, history) {
     if (window.confirm("¿Estás seguro?")) {
-      fetch(`/api/${this.props.type}/${id}`, { method: 'DELETE' })
+      fetch(`/api/${this.props.type}/${id}`, { method: 'DELETE', credentials: 'include' })
         .then(res => res.json())
         .then(id => {
           history.push('/' + this.props.type);

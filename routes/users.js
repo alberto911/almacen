@@ -1,16 +1,10 @@
 var express = require('express');
 var router = express.Router();
+var usuarioController = require('../controllers/usuarioController');
+var passport = require('../config/passport');
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  //res.send('respond with a resource');
-  res.json([{
-  	id: 1,
-  	username: "samsepi0l"
-  }, {
-  	id: 2,
-  	username: "D0loresH4ze"
-  }]);
-});
+router.post('/login', passport.authenticate('local'), usuarioController.login);
+router.get('/logout', usuarioController.logout);
+router.get('/loggedin', usuarioController.loggedIn, usuarioController.sendUser);
 
 module.exports = router;

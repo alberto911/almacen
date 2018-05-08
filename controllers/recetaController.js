@@ -1,4 +1,4 @@
-var db = require('seraph')({ pass: 'Ariel' });
+var db = require('../config/db');
 var Receta = require('../models/receta');
 var MateriaPrima = require('../models/materiaprima');
 var helper = require('./helper');
@@ -11,14 +11,9 @@ exports.receta_list = (req, res, next) => {
 };
 
 exports.proximos_a_caducar = (req, res, next) => {
-  const query = "match (p:ProductoElaborado)<-[HAY]-(r:Receta) "
-              + "where p.fechaCaducidad < {fecha} "
-              + "return id(p) as id, r.nombre as nombre, p.cantidad as cantidad, r.unidad as unidad, p.fechaCaducidad as fechaCaducidad "
-              + "order by fechaCaducidad";
-  db.query(query, { fecha: helper.todayPlusDays(3) }, (err, productos) => {
-    if (err) return next(err);
-    res.json(productos);
-  });
+  exports.getProximos()
+    .then(productos => res.json(productos))
+    .catch(error => next(error));
 };
 
 exports.costo = (req, res, next) => {
@@ -184,6 +179,19 @@ exports.delete_instance = (req, res, next) => {
   db.delete(req.params.iid, true, (err) => {
     if (err) return next(err);
     res.json(req.params.iid);
+  });
+};
+
+exports.getProximos = () => {
+  const query = "match (p:ProductoElaborado)<-[HAY]-(r:Receta) "
+              + "where p.fechaCaducidad < {fecha} "
+              + "return id(p) as id, r.nombre as nombre, p.cantidad as cantidad, r.unidad as unidad, p.fechaCaducidad as fechaCaducidad "
+              + "order by fechaCaducidad";
+  return new Promise((resolve, reject) => {
+    db.query(query, { fecha: helper.todayPlusDays(3) }, (err, productos) => {
+      if (err) return reject(err);
+      resolve(productos);
+    });
   });
 };
 

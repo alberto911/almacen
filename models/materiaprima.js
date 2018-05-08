@@ -1,4 +1,4 @@
-var db = require('seraph')({ pass: 'Ariel' });
+var db = require('../config/db');
 var MateriaPrima = require('seraph-model')(db, 'MateriaPrima');
 var MateriaPrimaInstance = require('./materiaprima-instance');
 var schedule = require('node-schedule');
@@ -13,7 +13,7 @@ MateriaPrima.schema = {
 
 MateriaPrima.compose(MateriaPrimaInstance, 'instancias', 'HAY', { many: true, orderBy: 'fechaCaducidad' });
 
-const eliminar_caducados = () => {
+const eliminarCaducados = () => {
   const today = new Date().setHours(0, 0, 0, 0);
   const query = "match (n:MateriaPrima)-[:HAY]->(i:MateriaPrimaInstance) where i.fechaCaducidad < {fecha} "
               + "return id(i) as id, ((i.cantidad * n.costo) / n.cantidad) as costo";
@@ -36,6 +36,6 @@ const eliminar_caducados = () => {
   });
 };
 
-var j = schedule.scheduleJob('0 0 * * *', eliminar_caducados);
+var j = schedule.scheduleJob('0 0 * * *', eliminarCaducados);
 
 module.exports = MateriaPrima;

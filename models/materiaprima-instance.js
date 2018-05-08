@@ -1,4 +1,4 @@
-var db = require('seraph')({ pass: 'Ariel' });
+var db = require('../config/db');
 var MateriaPrimaInstance = require('seraph-model')(db, 'MateriaPrimaInstance');
 
 MateriaPrimaInstance.schema = {

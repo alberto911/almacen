@@ -1,4 +1,4 @@
-var db = require('seraph')({ pass: 'Ariel' });
+var db = require('../config/db');
 var ProductoElaborado = require('seraph-model')(db, 'ProductoElaborado');
 
 ProductoElaborado.schema = {

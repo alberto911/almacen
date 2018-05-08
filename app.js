@@ -3,33 +3,15 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var session = require('express-session');
+var passport = require('./config/passport');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var almacenRouter = require('./routes/almacen');
+var usuarioController = require('./controllers/usuarioController')
 
 var app = express();
-
-/*var MateriaPrima = require('./models/materiaprima');
-var instancia2 = {
-  cantidad: 2,
-  fechaCaducidad: '2019/05/26'
-};
-MateriaPrima.push(15, 'instancias', instancia2, function(err, res) {
-  if (err) throw err;
-  console.log(res);
-});
-var ProductoElaborado = require('./models/productoelaborado');
-var producto = {
-  nombre: 'Guacamole',
-  diasCaducidad: 3,
-  cantidad: 0.5,
-  unidad: 'kg'
-};
-ProductoElaborado.save(producto, (err, res) => {
-  if (err) throw err;
-  console.log(res);
-});*/
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -41,9 +23,17 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(session({
+  secret: "cats",
+  resave: false,
+  saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/api', almacenRouter);
+app.use('/', usersRouter);
+app.use('/api', usuarioController.loggedIn, almacenRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

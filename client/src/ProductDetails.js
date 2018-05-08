@@ -35,7 +35,7 @@ class ProductDetails extends Component {
   }
 
   loadProduct() {
-    fetch(`/api/${this.props.type}/${this.props.id}`)
+    fetch(`/api/${this.props.type}/${this.props.id}`, { credentials: 'include' })
       .then(res => res.json())
       .then(product => this.setState({ product: product }))
       .catch(error => console.error(error));
@@ -73,9 +73,10 @@ class ProductDetails extends Component {
 
     fetch(`/api/${this.props.type}/${this.props.id}`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         Accept: 'application/json',
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: json
     })
@@ -84,7 +85,7 @@ class ProductDetails extends Component {
   }
 
   deleteInstance(iid) {
-    fetch(`/api/${this.props.type}/${this.props.id}/instancias/${iid}`, { method: 'DELETE' })
+    fetch(`/api/${this.props.type}/${this.props.id}/instancias/${iid}`, { method: 'DELETE', credentials: 'include' })
       .then(this.loadProduct)
       .catch(error => console.error(error));
   }

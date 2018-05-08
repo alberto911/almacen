@@ -98,7 +98,7 @@ class IngredientForm extends Component {
 
   onSelectCategory(e) {
     const category = e.target.value;
-    fetch(`/api/materiasprimas/categoria/${category}`)
+    fetch(`/api/materiasprimas/categoria/${category}`, { credentials: 'include' })
       .then(res => res.json())
       .then(products => products.sort(compare))
       .then(products => this.setState({ products: products, unit: '' }))

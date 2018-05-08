@@ -1,8 +1,9 @@
-var db = require('seraph')({ pass: 'Ariel' });
+var db = require('../config/db');
 var Receta = require('seraph-model')(db, 'Receta');
 var ProductoElaborado = require('./productoelaborado');
 var recetaController = require('../controllers/recetaController');
 var schedule = require('node-schedule');
+var mailer = require('../config/mailer');
 
 Receta.setUniqueKey('nombre');
 Receta.schema = {
@@ -14,7 +15,7 @@ Receta.schema = {
 
 Receta.compose(ProductoElaborado, 'instancias', 'HAY', { many: true, orderBy: 'fechaCaducidad' });
 
-const eliminar_caducados = () => {
+const eliminarCaducados = () => {
   const today = new Date().setHours(0, 0, 0, 0);
   const query = "match (n:Receta)-[:HAY]->(i:ProductoElaborado) where i.fechaCaducidad < {fecha}"
               + " return id(i) as idProducto, id(n) as idReceta, i.cantidad / n.cantidad as factor";
@@ -44,6 +45,29 @@ const eliminar_caducados = () => {
   });
 };
 
-var j = schedule.scheduleJob('0 0 * * *', eliminar_caducados);
+const enviarMail = () => {
+  recetaController.getProximos()
+    .then(productos => {
+      var html = '<p>Hola, a continuación encontrarás una lista de los productos elaborados próximos a caducar:</p><ul>';
+      for (p of productos)
+        html += `<li>${p.nombre}: ${p.cantidad} ${p.unidad}, caduca ${new Date(p.fechaCaducidad).toLocaleDateString()}</li>`
+      html += '</ul>';
+      mailer.mailOptions.html = html;
+
+      db.query('match (n:Usuario) return n.email as email', (err, emails) => {
+        if (err) return console.error(err);
+        mailer.mailOptions.to = emails.map(x => x.email).join();
+
+        mailer.transporter.sendMail(mailer.mailOptions, function(error, info){
+          if (error) return console.error(error);
+          console.log('Email sent: ' + info.response);
+        });
+      });
+    })
+    .catch(err => console.error(err));
+};
+
+schedule.scheduleJob('0 0 * * *', eliminarCaducados);
+schedule.scheduleJob('0 0 */3 * *', enviarMail);
 
 module.exports = Receta;
