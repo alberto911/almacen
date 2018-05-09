@@ -103,16 +103,7 @@ class ProductDetails extends Component {
             <h2>{this.state.product.nombre}</h2>
             <DeleteButton deleteProduct={this.props.deleteProduct} id={this.props.id} />
             <button onClick={() => this.setState({ edit: true })}>Editar</button>
-            <Info product={this.state.product} />
-
-            <Instances
-              instance_text={this.texts[this.props.type].instance_text}
-              no_instance_text={this.texts[this.props.type].no_instance_text}
-              instances={this.state.product.instancias}
-              unidad={this.state.product.unidad}
-              deleteInstance={this.deleteInstance}
-            />
-            <InstanceForm type={this.props.type} createInstance={this.createInstance} unidad={this.state.product.unidad}/>
+            
           </div>
           : <Form product={this.state.product} edit={true} createProduct={this.sendForm} />
         }
