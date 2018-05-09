@@ -10,7 +10,7 @@ exports.materiaprima_list = (req, res, next) => {
 };
 
 exports.proximos_a_caducar = (req, res, next) => {
-  const query = "match (i:MateriaPrimaInstance)<-[HAY]-(m:MateriaPrima) "
+  const query = "match (i:MateriaPrimaInstance)<-[:HAY]-(m:MateriaPrima) "
               + "where i.fechaCaducidad < {fecha} "
               + "return id(i) as id, m.nombre as nombre, i.cantidad as cantidad, m.unidad as unidad, i.fechaCaducidad as fechaCaducidad "
               + "order by fechaCaducidad";

@@ -30,11 +30,11 @@ class Home extends Component {
                 </Link>
             </div>
             <div class="content">
-                Este es el sistema de miComidita S.A. desde aqui tienes acceso a dos tipos de almacenes uno de materias primas y otro de producto elaborado.
+                Este es el sistema de miComidita S.A. desde aquí tienes acceso a dos tipos de almacenes uno de materias primas y otro de producto elaborado.
                 <br/><br/>
-                En este sistema se puede crear, ver, alterar y borrar recetas, materia prima y productos elaborados.
+                En este sistema se pueden crear, ver, alterar y borrar recetas, materia prima y productos elaborados.
                 <br/><br/>
-                Esperemos les sea util el sistema.
+                Esperemos les sea útil el sistema.
             </div>
             <div class="footer">
                 Abril 2018
