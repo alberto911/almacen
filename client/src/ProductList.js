@@ -10,7 +10,7 @@ import './ProductList.css';
 
 const Product = (product) => (
   <div>
-    <Link to={`/${product.type}/${product.id}`}>
+    <Link to={`/${product.type}/${product.id}`}class="prodLink">
       <h4>{product.nombre}</h4>
     </Link>
   </div>
@@ -88,32 +88,40 @@ class ProductList extends Component {
     return (
       <div>
         <div className="sidenav">
-          <Link to={`/${this.props.type}`} className="title">
-            <h1>{this.props.name}</h1>
-          </Link>
-          <Link to={'/'}>
-            <p>{'<< Inicio'}</p>
-          </Link>
-          <AddProductButon type={this.props.type} />
-          {this.props.type === 'materiasprimas' && <CategorySelect filter={true} onChange={this.changeFilter}/>}
-          {this.state.products.map(product =>
-            <Product key={product.id} type={this.props.type} {...product} />
-          )}
+            <div class="inicio">
+            <Link to={'/'} class="btn-home">
+              <p><i class="fas fa-arrow-alt-circle-left"></i>  {'Inicio'}</p>
+            </Link>
+        </div>
+            <div class="contentNav">
+              <Link to={`/${this.props.type}`} className="title">
+                <h1>{this.props.name}</h1>
+              </Link>
+              <AddProductButon type={this.props.type} />
+              {this.props.type === 'materiasprimas' && <CategorySelect filter={true} onChange={this.changeFilter}/>}
+              {this.state.products.map(product =>
+                  <div class="productCard">
+                      <Product key={product.id} type={this.props.type} {...product} />
+                  </div>
+              )}
+            </div>
         </div>
         <div className="main">
-          <Switch>
-            <Route exact={true} path={`/${this.props.type}`} render={() => (
-              <Summary type={this.props.type} />
-            )} />
-            <Route exact={true} path={`/${this.props.type}/new`} render={() => (
-              this.props.type === 'materiasprimas' ?
-                <MateriaPrimaForm createProduct={this.createProduct} /> :
-                <RecetaForm createProduct={this.createProduct} />
-            )} />
-            <Route path={`/${this.props.type}/:productId`} render={({ match }) => (
-              <ProductDetails id={match.params.productId} deleteProduct={this.deleteProduct} createProduct={this.createProduct} type={this.props.type} />
-            )} />
-          </Switch>
+            <div class="contentPL">
+              <Switch>
+                <Route exact={true} path={`/${this.props.type}`} render={() => (
+                  <Summary type={this.props.type} />
+                )} />
+                <Route exact={true} path={`/${this.props.type}/new`} render={() => (
+                  this.props.type === 'materiasprimas' ?
+                    <MateriaPrimaForm createProduct={this.createProduct} /> :
+                    <RecetaForm createProduct={this.createProduct} />
+                )} />
+                <Route path={`/${this.props.type}/:productId`} render={({ match }) => (
+                  <ProductDetails id={match.params.productId} deleteProduct={this.deleteProduct} createProduct={this.createProduct} type={this.props.type} />
+                )} />
+              </Switch>
+            </div>
         </div>
       </div>
     );
@@ -122,7 +130,7 @@ class ProductList extends Component {
 
 const AddProductButon = withRouter((props) => {
   var onClick = () => props.history.push(`/${props.type}/new`);
-  return <button onClick={onClick}>Agregar</button>;
+  return <button class="btn-add" onClick={onClick}>Agregar</button>;
 });
 
 export default ProductList;

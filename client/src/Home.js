@@ -16,15 +16,29 @@ class Home extends Component {
   render() {
     return (
       <div>
-        <h1>Bienvenido {this.props.username}</h1>
-        <h3>Selecciona un almacén</h3>
-        <Link to={'/materiasprimas'}>
-          <h4>Materias primas</h4>
-        </Link>
-        <Link to={'/recetas'}>
-          <h4>Productos elaborados</h4>
-        </Link>
-        <button onClick={this.logout}>Log out</button>
+          <button class="btn-lgout" onClick={this.logout}>Log out</button>
+          <div class="header">
+              <h1>Bienvenido {this.props.username}</h1>
+              <h3>Selecciona un almacén</h3>
+          </div>
+          <div class="navbar">
+                <Link to={'/materiasprimas'}>
+                    <h4>Materias primas</h4>
+                </Link>
+                <Link to={'/recetas'}>
+                    <h4>Productos elaborados</h4>
+                </Link>
+            </div>
+            <div class="content">
+                Este es el sistema de miComidita S.A. desde aqui tienes acceso a dos tipos de almacenes uno de materias primas y otro de producto elaborado.
+                <br/><br/>
+                En este sistema se puede crear, ver, alterar y borrar recetas, materia prima y productos elaborados.
+                <br/><br/>
+                Esperemos les sea util el sistema.
+            </div>
+            <div class="footer">
+                Abril 2018
+            </div>
       </div>
     );
   }

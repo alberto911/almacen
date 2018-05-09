@@ -28,17 +28,18 @@ class LoginForm extends Component {
   render() {
     return (
       <div>
-        <h1>Inicia sesión</h1>
-        <form onSubmit={this.sendForm}>
-          <div>
-            <label htmlFor="username">Username: </label>
-            <input type="text" required name="username" id="username" />
+        <form onSubmit={this.sendForm} class="lgn-form">
+            <h1>Inicia sesión</h1>
+            <div class="imgcontainer">
+                <img src="images/img_avatar2.png" alt="Avatar" class="avatar"></img>
+            </div>
+          <div class="lgn-container">
+            <label htmlFor="username" class="lgn-input">Username: </label><br/>
+            <input class="lgn-input" type="text" required name="username" id="username" /><br/>
+            <label htmlFor="password" class="lgn-input">Password: </label><br/>
+            <input class="lgn-input" type="password" required name="password" id="password" />
           </div>
-          <div>
-            <label htmlFor="password">Password: </label>
-            <input type="password" required name="password" id="password" />
-          </div>
-          <button>Log in</button>
+          <button class="btn-lgn">Log in</button>
         </form>
       </div>
     );
