@@ -7,12 +7,7 @@ import MateriaPrimaInfo from './MateriaPrimaInfo';
 import RecetaInfo from './RecetaInfo';
 
 class ProductDetails extends Component {
-  render() {
-    return (
-      <p>Hola</p>
-    );
-  }
-  /*constructor(props) {
+  constructor(props) {
     super(props);
     this.createInstance = this.createInstance.bind(this);
     this.deleteInstance = this.deleteInstance.bind(this);
@@ -96,12 +91,12 @@ class ProductDetails extends Component {
   }
 
   render() {
-    if (!this.state.product)
-      return null;
     const Info = this.texts[this.props.type].info;
     const Form = this.texts[this.props.type].form;
 
     return (
+      !this.state.product ?
+        <p>Hola</p> :
       <div>
         {!this.state.edit ?
           <div>
@@ -123,7 +118,7 @@ class ProductDetails extends Component {
         }
       </div>
     );
-  }*/
+  }
 }
 
 const DeleteButton = withRouter((props) => (
