@@ -91,18 +91,19 @@ class ProductDetails extends Component {
   }
 
   render() {
+    if (!this.state.product)
+      return null;
     const Info = this.texts[this.props.type].info;
     const Form = this.texts[this.props.type].form;
 
     return (
-      !this.state.product ?
-        <p>Hola</p> :
       <div>
         {!this.state.edit ?
           <div>
             <h2>{this.state.product.nombre}</h2>
             <DeleteButton deleteProduct={this.props.deleteProduct} id={this.props.id} />
             <button onClick={() => this.setState({ edit: true })}>Editar</button>
+            <Info product={this.state.product} />
 
             <Instances
               instance_text={this.texts[this.props.type].instance_text}
