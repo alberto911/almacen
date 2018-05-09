@@ -3,7 +3,7 @@ var collections = require('./collections.js')
 
 const MateriaPrimaInfo = ({ product }) => {
   if (product.categoria)
-    var cat = collections.categorias.find(x => x.label === product.categoria)
+    var cat = collections.categorias.find(x => x.label === product.categoria);
   return (
     <div>
       {product.categoria && cat &&

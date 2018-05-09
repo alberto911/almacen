@@ -65,8 +65,7 @@ exports.materiaprima_read = (req, res, next) => {
     if (err || !node) return next(err);
     db.readLabels(node, (err, labels) => {
       if (err || !labels.includes('MateriaPrima')) return next(err);
-      console.log(labels);
-      node.categoria = labels.slice(-1)[0];
+      node.categoria = labels.filter(x => x != 'MateriaPrima')[0];
 
       // Calcular costo por instancia
       if (node.instancias) {
