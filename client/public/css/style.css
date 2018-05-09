@@ -139,6 +139,7 @@ img.avatar {
 .productCard {
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
     background-color: #333;
+    clear: both;
     color: white;
     transition: 0.3s;
     padding: 5%;
@@ -247,4 +248,45 @@ img.avatar {
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
+}
+@media screen and (max-width:800px){
+    .details{
+        width: 90%;
+        padding: 5%;
+        margin: 1%;
+        background-color: white;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        overflow: hidden;
+    }
+}
+
+@media screen and (max-width:800px){
+    .mp{
+        width: 90%;
+        padding: 10%;
+        background-color: white;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        overflow: hidden;
+    }
+}
+
+@media screen and (max-width:800px){
+    .receta{
+        width: 81%;
+        margin: 1%;
+        padding: 10%;
+        background-color: white;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        overflow: hidden;
+    }
+}
+
+@media screen and (max-width:800px){
+    .selecciona{
+    }
+}
+
+@media screen and (max-width:800px){
+    .btn-add    {
+    }
 }
