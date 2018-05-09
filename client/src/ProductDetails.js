@@ -7,7 +7,12 @@ import MateriaPrimaInfo from './MateriaPrimaInfo';
 import RecetaInfo from './RecetaInfo';
 
 class ProductDetails extends Component {
-  constructor(props) {
+  render() {
+    return (
+      <p>Hola</p>
+    );
+  }
+  /*constructor(props) {
     super(props);
     this.createInstance = this.createInstance.bind(this);
     this.deleteInstance = this.deleteInstance.bind(this);
@@ -118,7 +123,7 @@ class ProductDetails extends Component {
         }
       </div>
     );
-  }
+  }*/
 }
 
 const DeleteButton = withRouter((props) => (
