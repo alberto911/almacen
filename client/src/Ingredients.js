@@ -8,7 +8,7 @@ const Ingredients = (props) => (
         <li key={ingredient.id}>
           {ingredient.cantidad} {ingredient.unidad} de {ingredient.nombre.toLowerCase()} &emsp;
           {props.removeIngredient &&
-            <button onClick={() => props.removeIngredient(ingredient.id)}>Quitar</button>
+            <button class="btn" onClick={() => props.removeIngredient(ingredient.id)}>Quitar</button>
           }
         </li>
       )}

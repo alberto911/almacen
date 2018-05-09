@@ -2,7 +2,7 @@ import React from 'react';
 var collections = require('./collections')
 
 const CategorySelect = (props) => (
-  <div>
+  <div class="selecciona">
     <label htmlFor="categoria">Categoría: </label>
     <select required name="categoria" id="categoria" defaultValue="" onChange={props.onChange}>
       <option value="" disabled={!props.filter}>

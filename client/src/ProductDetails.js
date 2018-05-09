@@ -99,10 +99,10 @@ class ProductDetails extends Component {
     return (
       <div>
         {!this.state.edit ?
-          <div>
+          <div class="details">
             <h2>{this.state.product.nombre}</h2>
             <DeleteButton deleteProduct={this.props.deleteProduct} id={this.props.id} />
-            <button onClick={() => this.setState({ edit: true })}>Editar</button>
+            <button class="btn" onClick={() => this.setState({ edit: true })}>Editar</button>
             <Info product={this.state.product} />
 
             <Instances
@@ -122,7 +122,7 @@ class ProductDetails extends Component {
 }
 
 const DeleteButton = withRouter((props) => (
-  <button onClick={() => props.deleteProduct(props.id, props.history)}>Eliminar</button>
+  <button class="btn" onClick={() => props.deleteProduct(props.id, props.history)}>Eliminar</button>
 ));
 
 const InstanceForm = (props) => (
@@ -137,7 +137,7 @@ const InstanceForm = (props) => (
           <input type="date" required id="fechaCaducidad" name="fechaCaducidad"></input>
         </div>
       }
-      <button>Crear</button>
+      <button class="btn">Crear</button>
     </form>
   </div>
 );

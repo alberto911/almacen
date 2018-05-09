@@ -56,16 +56,16 @@ class RecetaForm extends Component {
 
   render() {
     return (
-      <div>
+      <div class="receta">
         {this.props.edit ? <h2>Editar {this.props.product.nombre}</h2> : <h2>Agregar receta</h2>}
         <form id="recetaForm" onSubmit={this.sendForm} ref={this.form}>
-          <button>Guardar receta</button><br /><br />
-          <label htmlFor="nombre">Nombre: </label>
-          <input type="text" required id="nombre" name="nombre"></input><br />
-          <label htmlFor="cantidad">Cantidad: </label>
-          <input type="text" required id="cantidad" name="cantidad" size="4"></input> <UnitSelect /><br />
-          <label htmlFor="diasCaducidad">Días para caducar: </label>
-          <input type="text" required id="diasCaducidad" name="diasCaducidad" size="4"></input><br />
+          <label class="float" htmlFor="nombre">Nombre: </label>
+          <input class="addR" type="text" required id="nombre" name="nombre"></input><br />
+          <label class="float" htmlFor="cantidad">Cantidad: </label>
+          <input class="addR" type="text" required id="cantidad" name="cantidad" size="4"></input> <UnitSelect /><br />
+          <label class="float" htmlFor="diasCaducidad">Días para caducar: </label>
+          <input class="addR" type="text" required id="diasCaducidad" name="diasCaducidad" size="4"></input><br />
+          <button class="btn">Guardar receta</button><br /><br />
         </form>
 
         <Ingredients ingredients={this.state.ingredients} removeIngredient={this.removeIngredient} />
@@ -128,11 +128,11 @@ class IngredientForm extends Component {
             )}
           </select><br />
 
-          <label htmlFor="cantidad">Cantidad: </label>
-          <input type="text" required id="cantidad" name="cantidad" size="4" placeholder="Cantidad"></input> {this.state.unit}<br />
+          <label class="float" htmlFor="cantidad">Cantidad: </label>
+          <input class="addR" type="text" required id="cantidad" name="cantidad" size="4" placeholder="Cantidad"></input> {this.state.unit}<br />
           <input type="text" hidden id="unidad" name="unidad" value={this.state.unit}></input>
           <input type="text" hidden id="nombre" name="nombre" value={this.state.name}></input>
-          <button>Agregar ingrediente</button>
+          <button class="btn">Agregar ingrediente</button>
         </form>
       </div>
     );

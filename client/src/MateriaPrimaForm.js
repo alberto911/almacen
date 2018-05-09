@@ -28,17 +28,21 @@ class MateriaPrimaForm extends Component {
 
   render() {
     return (
-      <div>
+      <div class="mp">
         {this.props.edit ? <h2>Editar {this.props.product.nombre}</h2> : <h2>Agregar materia prima</h2>}
         <form id="materiaPrimaForm" onSubmit={this.sendForm} ref={this.form}>
-          <label htmlFor="nombre">Nombre: </label>
-          <input type="text" required id="nombre" name="nombre"></input><br />
-          <CategorySelect />
+          <label htmlFor="nombre" class="float">Nombre: </label>
+          <input class="addMP" type="text" required id="nombre" name="nombre"></input><br />
           {this.props.edit && <input type="text" hidden id="categoria_anterior" name="categoria_anterior"></input>}
-          <label htmlFor="costo">Costo: $</label>
-          <input type="text" required id="costo" name="costo" size="6"></input> por <
-          input type="text" required id="cantidad" name="cantidad" size="4" placeholder="Cantidad"></input> <UnitSelect />
-          <button>Enviar</button>
+          <label htmlFor="costo" class="float">Costo:</label>
+          <input class="addMP" type="text" required id="costo" name="costo" size="6" placeholder="$"></input>
+          <label htmlFor="cantidad" class="float"> Por: </label>
+          <input class="addMP" type="text" required id="cantidad" name="cantidad" size="4" placeholder="Cantidad"></input>
+          <div class="float">
+              <UnitSelect />
+              <CategorySelect />
+          </div>
+          <button class="btn-mp">Enviar</button>
         </form>
       </div>
     );
